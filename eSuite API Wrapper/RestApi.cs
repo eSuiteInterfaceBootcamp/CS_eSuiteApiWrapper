@@ -56,6 +56,31 @@ namespace eSuiteApiWrapper
         {
             return postData(path, jsonData);
         }
+        public string InsertData(string path, string jsonData, out int newId)
+        {
+            newId = -1;
+            string result = postData(path, jsonData);
+
+            int startId = result.IndexOf(",\"id\":");
+
+            if (startId > 0)
+            {
+                startId += 6;
+                int endId = result.IndexOf(",", startId);
+
+                if (endId > 0 && endId - startId < 5)
+                {
+                    string id = result.Substring(startId, endId - startId);
+
+                    if (!int.TryParse(id, out newId))
+                    {
+                        newId = -1;
+                    }
+                }
+            }
+
+            return result;
+        }
         public string UpdateData(string path, string jsonData)
         {
             return putData(path, jsonData);
