@@ -58,26 +58,8 @@ namespace eSuiteApiWrapper
         }
         public string InsertData(string path, string jsonData, out int newId)
         {
-            newId = -1;
             string result = postData(path, jsonData);
-
-            int startId = result.IndexOf(",\"id\":");
-
-            if (startId > 0)
-            {
-                startId += 6;
-                int endId = result.IndexOf(",", startId);
-
-                if (endId > 0 && endId - startId < 5)
-                {
-                    string id = result.Substring(startId, endId - startId);
-
-                    if (!int.TryParse(id, out newId))
-                    {
-                        newId = -1;
-                    }
-                }
-            }
+            newId = parseId(result);
 
             return result;
         }
@@ -88,6 +70,14 @@ namespace eSuiteApiWrapper
         public void DeleteData(string path)
         {
             deleteData(path);
+        }
+        public string SearchByGet(string path, out int id)
+        {
+            path = "search/" + path;
+            string result = getData(path);
+            id = parseId(result);
+
+            return result;
         }
 
 
@@ -160,6 +150,30 @@ namespace eSuiteApiWrapper
         private void deleteData(string subUrl)
         {
             getApiResponse(getWebRequest(_baseURL + subUrl, "DELETE", "application/json"));
+        }
+
+        private int parseId(string json)
+        {
+            int id = -1;
+            int startId = json.IndexOf(",\"id\":");
+
+            if (startId > 0)
+            {
+                startId += 6;
+                int endId = json.IndexOf(",", startId);
+
+                if (endId > 0 && endId - startId < 5)
+                {
+                    string idString = json.Substring(startId, endId - startId);
+
+                    if (!int.TryParse(idString, out id))
+                    {
+                        id = -1;
+                    }
+                }
+            }
+
+            return id;
         }
     }
 }
